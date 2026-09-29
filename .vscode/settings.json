@@ -1,0 +1,9 @@
+{
+  "arduino.useArduinoCli": true,
+  "arduino.path": "C:\\Program Files\\Arduino IDE\\resources\\app\\lib\\backend\\resources",
+  "arduino.commandPath": "arduino-cli.exe",
+  "arduino.additionalUrls": [
+    "https://github.com/Ameba-AIoT/ameba-arduino-pro2/raw/main/Arduino_package/package_realtek_amebapro2_index.json"
+  ],
+  "arduino.clearOutputOnBuild": true
+}

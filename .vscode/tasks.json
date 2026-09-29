@@ -1,0 +1,85 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "AMB82: Build",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}\\scripts\\amb82.ps1",
+        "compile"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$gcc"]
+    },
+    {
+      "label": "AMB82: Upload to COM3",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}\\scripts\\amb82.ps1",
+        "upload",
+        "-Port",
+        "COM3"
+      ],
+      "problemMatcher": ["$gcc"]
+    },
+    {
+      "label": "Voice LED: Build",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}\\scripts\\amb82.ps1", "compile", "-SketchName", "voice_led"],
+      "problemMatcher": ["$gcc"]
+    },
+    {
+      "label": "Voice LED: Upload to COM6",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}\\scripts\\amb82.ps1", "upload", "-Port", "COM6", "-SketchName", "voice_led"],
+      "problemMatcher": ["$gcc"]
+    },
+    {
+      "label": "Voice LED: Web UI (localhost:8000)",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}\\scripts\\serve.ps1"],
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Voice LED: Build Submission (PDF + ZIP)",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}\\scripts\\build_submission.ps1"],
+      "problemMatcher": []
+    },
+    {
+      "label": "AMB82: Serial Monitor (COM6, 115200)",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}\\scripts\\amb82.ps1",
+        "monitor",
+        "-Port",
+        "COM6"
+      ],
+      "problemMatcher": []
+    }
+  ]
+}
+

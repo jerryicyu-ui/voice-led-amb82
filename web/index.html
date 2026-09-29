@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>語音控制 LED · AMB82-MINI</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div>
+      <h1>語音控制 LED</h1>
+      <p class="sub">Realtek AMB82-MINI · 左邊 = 藍燈 LED_B (D23) · 右邊 = 綠燈 LED_G (D24)</p>
+    </div>
+    <span id="connection" class="pill">未連線</span>
+  </header>
+
+  <main>
+    <section class="card settings">
+      <h2>1. 連線（USB 序列埠）</h2>
+      <div class="row">
+        <button id="connectBtn" class="primary">連線開發板</button>
+        <span class="hint">第一次連線時從清單選擇 AMB82-MINI 的 COM 埠。之後重新整理或重插 USB 會自動連線。請先關閉 VS Code 的序列埠監控視窗。</span>
+      </div>
+    </section>
+
+    <div id="notice" class="notice" hidden></div>
+
+    <section class="card voice">
+      <h2>2. 語音指令</h2>
+      <div class="row">
+        <label>辨識語言
+          <select id="lang">
+            <option value="zh-TW">中文（台灣）</option>
+            <option value="en-US">English (US)</option>
+          </select>
+        </label>
+        <label><input type="checkbox" id="continuous"> 持續聆聽</label>
+        <label><input type="checkbox" id="speakBack" checked> 語音回覆</label>
+      </div>
+      <button id="mic" class="mic" aria-label="按下說話">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2Z"/></svg>
+        <span id="micLabel">按下說話</span>
+      </button>
+      <p id="micHint" class="hint">也可以按空白鍵。試試：「左邊開燈」「右邊開燈」「關燈」「閃爍三次」「turn on the left light」</p>
+
+      <dl class="result">
+        <dt>辨識結果</dt><dd id="recognized">—</dd>
+        <dt></dt><dd id="alternatives" class="hint"></dd>
+        <dt>執行情形</dt><dd id="parsed">—</dd>
+      </dl>
+    </section>
+
+    <section class="card leds">
+      <h2>3. LED 狀態（板子回報）</h2>
+      <div class="led-row">
+        <div id="ledBlue" class="led blue unknown"><div class="bulb"></div><b>左邊 · 藍燈</b><span class="state">未知</span></div>
+        <div id="ledGreen" class="led green unknown"><div class="bulb"></div><b>右邊 · 綠燈</b><span class="state">未知</span></div>
+      </div>
+      <p id="ledSource" class="hint">無法取得板子回報，LED 實際狀態未知</p>
+    </section>
+
+    <section class="card manual">
+      <h2>4. 手動控制 / 文字測試</h2>
+      <div class="buttons">
+        <button data-cmd="BLUE_ON">左邊開燈</button>
+        <button data-cmd="BLUE_OFF">左邊關燈</button>
+        <button data-cmd="GREEN_ON">右邊開燈</button>
+        <button data-cmd="GREEN_OFF">右邊關燈</button>
+        <button data-cmd="ALL_OFF">全部關燈</button>
+        <button data-cmd="BLINK_ALL">閃爍三次</button>
+      </div>
+      <form id="textForm" class="row">
+        <input id="textInput" placeholder="輸入一句話模擬語音辨識結果，例如：今天天氣很好" autocomplete="off">
+        <button type="submit">送出</button>
+      </form>
+    </section>
+
+    <section class="card log">
+      <h2>5. 執行紀錄（驗收用）</h2>
+      <div class="row between">
+        <span id="logSummary" class="hint"></span>
+        <span>
+          <button id="exportBtn">匯出 CSV</button>
+          <button id="clearBtn">清除</button>
+        </span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>時間</th><th>來源</th><th>辨識結果</th><th>指令</th><th>執行結果</th><th>板子回報狀態</th></tr></thead>
+          <tbody id="logBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer><a href="test.html">解析器自我測試</a></footer>
+
+  <script src="commands.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "sketch": "voice_led/voice_led.ino",
+  "board": "realtek:AmebaPro2:Ameba_AMB82-MINI",
+  "port": "COM6",
+  "output": "C:\\Users\\88692\\AppData\\Local\\Arduino15\\build\\voice_led",
+  "configuration": "01_AutoUploadMode=Disable,02_UploadBaudrate=2M,03_EraseFlash=Disable,04_CameraOption=f37,05_FCSMode=Disable,06_LoadNNModelSource=flash,07_OTAMode=Disable,08_StdLibInit=Enable,09_Ard_logs=EnableAllArdLogs,10_system_mm_logs=EnableAllLogs,11_system_wifi_logs=EnableWiFiLogs,12_all_logs=DisableHardMuteLogs,13_Watchdog=DisableWatchdog"
+}
