@@ -1,7 +1,7 @@
 # 運用 Vibe Coding 實作 Ameba Mini 語音控制 LED 系統
 
 - 姓名／學號：【請填寫】
-- 示範影片（YouTube）：【請填寫連結】
+- 示範影片（YouTube）：https://youtube.com/shorts/Yi2CqAtgars
 - 原始程式碼（GitHub）：https://github.com/jerryicyu-ui/voice-led-amb82
 
 > 本草稿標示【請填寫】的地方，都需要依你實際測試、錄影與心得補上，完成後匯出成 PDF。
