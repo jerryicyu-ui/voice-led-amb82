@@ -92,7 +92,8 @@ class SerialTransport {
         }
       }, COMMAND_TIMEOUT_MS);
     });
-    await this.writer.write(new TextEncoder().encode(cmd + '\n'));
+    // USB 拔除時 write() 可能永遠不會結束，所以寫入也套用同一個逾時
+    await Promise.race([this.writer.write(new TextEncoder().encode(cmd + '\n')), reply]);
     return reply;
   }
 
@@ -105,10 +106,12 @@ class SerialTransport {
     this.port = null;
     this.openedPort = null;
     if (!port) return;
-    try { await this.reader?.cancel(); } catch { /* 已中斷 */ }
+    // USB 已拔除時 cancel() / close() 可能不會結束，每一步最多等 1 秒
+    const atMost1s = (promise) => Promise.race([promise, new Promise((resolve) => setTimeout(resolve, 1000))]);
+    try { await atMost1s(this.reader?.cancel()); } catch { /* 已中斷 */ }
     try { this.reader?.releaseLock(); } catch { /* 已釋放 */ }
     try { this.writer?.releaseLock(); } catch { /* 已釋放 */ }
-    try { await port.close(); } catch { /* USB 已拔除 */ }
+    try { await atMost1s(port.close()); } catch { /* USB 已拔除 */ }
   }
 }
 
@@ -127,10 +130,20 @@ function sendToBoard(cmd) {
   return job;
 }
 
+// 自動連線（重新整理、USB 插上）和按鈕可能同時觸發，一次只跑一個，避免同一個埠被 open() 兩次
+let connectChain = Promise.resolve();
+function connect(port = null) {
+  connectChain = connectChain.then(() => connectNow(port));
+  return connectChain;
+}
+
 // port 省略時跳出瀏覽器的序列埠選擇視窗
-async function connect(port = null) {
+async function connectNow(port) {
   // 通訊中斷（例如心跳逾時）時埠可能還開著，不論狀態都先關閉舊連線
   if (transport) await transport.close();
+  // 舊連線卡住的指令不能擋住新連線
+  queue = Promise.resolve();
+  polling = false;
 
   try {
     transport = new SerialTransport();
