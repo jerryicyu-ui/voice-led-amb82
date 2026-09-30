@@ -76,7 +76,7 @@ class SerialTransport {
     this.pending = null;
     this.port = null;
     if (transport === this && online) {
-      showNotice(`與開發板的通訊中斷：${reason}`, 'error');
+      showNotice(`與開發板的通訊中斷：${reason}。插好 USB 線後，請按「連線開發板」重新連線`, 'error');
       setOnline(false, reason);
     }
   }
@@ -130,7 +130,7 @@ function sendToBoard(cmd) {
   return job;
 }
 
-// 自動連線（重新整理、USB 插上）和按鈕可能同時觸發，一次只跑一個，避免同一個埠被 open() 兩次
+// 連續按兩次「連線開發板」時一次只跑一個，避免同一個埠被 open() 兩次
 let connectChain = Promise.resolve();
 function connect(port = null) {
   connectChain = connectChain.then(() => connectNow(port));
@@ -452,13 +452,11 @@ function init() {
 
   setInterval(() => { if (transport) refreshStatus(); }, POLL_INTERVAL_MS);
 
+  // 連線一律手動：開啟網頁或 USB 重新插上時都不自動連線，要按「連線開發板」
   if ('serial' in navigator) {
-    // 之前授權過的埠不必再跳選擇視窗：重新整理頁面、或 USB 重新插上時自動連線
-    navigator.serial.getPorts().then((ports) => { if (ports.length === 1) connect(ports[0]); });
-    navigator.serial.addEventListener('connect', (event) => {
+    navigator.serial.addEventListener('connect', () => {
       if (!transport || !transport.connected) {
-        showNotice('偵測到 USB 重新插上，等待開發板開機後自動連線…', 'warn');
-        setTimeout(() => connect(event.target), 1500);
+        showNotice('偵測到 USB 已插上，等板子開機幾秒後，請按「連線開發板」', 'warn');
       }
     });
   } else {
