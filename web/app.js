@@ -31,8 +31,9 @@ class SerialTransport {
       await this.port.open({ baudRate: 115200 });
     } catch (err) {
       this.port = null;
-      throw new Error(`無法開啟序列埠，請先關閉 VS Code 的序列埠監控視窗（${err.message}）`);
+      throw new Error(`無法開啟序列埠，請先關閉 VS Code 的序列埠監控視窗，或其他開著這個網頁的分頁（${err.message}）`);
     }
+    this.openedPort = this.port;
     this.writer = this.port.writable.getWriter();
     navigator.serial.addEventListener('disconnect', (event) => {
       if (event.target === this.port) this.lost('USB 線已拔除');
@@ -74,7 +75,6 @@ class SerialTransport {
     if (this.pending) this.pending.reject(new Error(`序列埠中斷：${reason}`));
     this.pending = null;
     this.port = null;
-    this.writer = null;
     if (transport === this && online) {
       showNotice(`與開發板的通訊中斷：${reason}`, 'error');
       setOnline(false, reason);
@@ -95,6 +95,21 @@ class SerialTransport {
     await this.writer.write(new TextEncoder().encode(cmd + '\n'));
     return reply;
   }
+
+  // 重新連線前一定要真的關閉：讀取和寫入的 lock 都要先釋放，port.close() 才會成功，
+  // 否則同一個埠再 open() 會出現 "The port is already open"
+  async close() {
+    const port = this.openedPort;
+    if (this.pending) this.pending.reject(new Error('重新連線，舊的指令已取消'));
+    this.pending = null;
+    this.port = null;
+    this.openedPort = null;
+    if (!port) return;
+    try { await this.reader?.cancel(); } catch { /* 已中斷 */ }
+    try { this.reader?.releaseLock(); } catch { /* 已釋放 */ }
+    try { this.writer?.releaseLock(); } catch { /* 已釋放 */ }
+    try { await port.close(); } catch { /* USB 已拔除 */ }
+  }
 }
 
 let transport = null;
@@ -114,9 +129,8 @@ function sendToBoard(cmd) {
 
 // port 省略時跳出瀏覽器的序列埠選擇視窗
 async function connect(port = null) {
-  if (transport && transport.connected) {
-    try { await transport.reader.cancel(); await transport.port.close(); } catch { /* 已中斷 */ }
-  }
+  // 通訊中斷（例如心跳逾時）時埠可能還開著，不論狀態都先關閉舊連線
+  if (transport) await transport.close();
 
   try {
     transport = new SerialTransport();
